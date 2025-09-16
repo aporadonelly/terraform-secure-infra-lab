@@ -38,14 +38,57 @@ This project demonstrates how to:
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - [Terraform](https://developer.hashicorp.com/terraform/downloads)
-- Cloud CLI (Azure CLI or AWS CLI, depending on provider)
+- Cloud CLI (Azure CLI)
 - Git
 
 ### Clone the Repo
 ```bash
-git clone https://github.com/<your-org>/terraform-secure-infra-lab.git
+git clone https://github.com/aporadonelly/terraform-secure-infra-lab.git
 cd terraform-secure-infra-lab
+```
+
+### Work in Your Own Branch
+```bash
+git checkout -b feature/<your-name>
+git add .
+git commit -m "Added network module resources"
+git push origin feature/<your-name>
+
+Then, open a Pull Request (PR) into main when your part is ready. Our teammate will review and will merge.
+```
+
+
+## Repo Structure
+.
+├── main.tf                # Root configuration
+├── variables.tf           # Global variables
+├── outputs.tf             # Global outputs
+├── modules/
+│   ├── network/           # VNet, subnets, NSGs
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   ├── compute/           # Bastion + Private VMs
+│   │   ├── main.tf
+│   │   ├── variables.tf
+│   │   └── outputs.tf
+│   └── keyvault/          # Key Vault + secrets + IAM
+│       ├── main.tf
+│       ├── variables.tf
+│       └── outputs.tf
+└── README.md
+
+
+## 👥 Team Roles
+
+Networking Lead – VNet, subnets, NSGs.
+
+Compute Lead – Bastion and private VMs.
+
+Security Lead – Key Vault, secrets, managed identity.
+
+Integration & Docs Lead – Root wiring, outputs, documentation.
