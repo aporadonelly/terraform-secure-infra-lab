@@ -61,28 +61,6 @@ git push origin feature/<your-name>
 Then, open a Pull Request (PR) into main when your part is ready. Our teammate will review and will merge.
 ```
 
-
-## Repo Structure
-.
-├── main.tf                # Root configuration
-├── variables.tf           # Global variables
-├── outputs.tf             # Global outputs
-├── modules/
-│   ├── network/           # VNet, subnets, NSGs
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   ├── compute/           # Bastion + Private VMs
-│   │   ├── main.tf
-│   │   ├── variables.tf
-│   │   └── outputs.tf
-│   └── keyvault/          # Key Vault + secrets + IAM
-│       ├── main.tf
-│       ├── variables.tf
-│       └── outputs.tf
-└── README.md
-
-
 ## 👥 Team Roles
 
 Networking Lead – VNet, subnets, NSGs.
@@ -92,3 +70,30 @@ Compute Lead – Bastion and private VMs.
 Security Lead – Key Vault, secrets, managed identity.
 
 Integration & Docs Lead – Root wiring, outputs, documentation.
+
+
+## 🏗️ Repo Structure
+
+```mermaid
+flowchart TD
+    A[Root Repo] --> B[main.tf]
+    A --> C[variables.tf]
+    A --> D[outputs.tf]
+    A --> E[modules/]
+
+    E --> F[network/]
+    F --> F1[main.tf]
+    F --> F2[variables.tf]
+    F --> F3[outputs.tf]
+
+    E --> G[compute/]
+    G --> G1[main.tf]
+    G --> G2[variables.tf]
+    G --> G3[outputs.tf]
+
+    E --> H[keyvault/]
+    H --> H1[main.tf]
+    H --> H2[variables.tf]
+    H --> H3[outputs.tf]
+
+    A --> I[README.md]
