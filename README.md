@@ -4,6 +4,8 @@ A modular Infrastructure-as-Code project that provisions a secure cloud environm
 The setup includes a Virtual Network, public and private subnets, bastion and private VMs, Network Security Groups (NSGs), and secret management using Key Vault.
 Security principles such as least privilege, managed identity, and secure-by-design are applied throughout.
 
+A modular Infrastructure-as-Code (IaC) project that provisions a secure, scalable cloud environment in Microsoft Azure using Terraform. This lab demonstrates how to build a production-grade architecture that enforces strong security boundaries, identity-based access, and centralized secret management.
+
 ---
 
 ## 📌 Project Overview
