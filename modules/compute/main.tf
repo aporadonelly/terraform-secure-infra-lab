@@ -52,6 +52,10 @@ resource "azurerm_linux_virtual_machine" "bastion" {
         sku = "20_04-lts"
         version = "latest"
     }
+
+    identity {
+        type = "SystemAssigned"
+    }
 }
 
 resource "azurerm_network_interface" "private_nic" {
@@ -92,5 +96,9 @@ resource "azurerm_linux_virtual_machine" "private_vm" {
         offer = "0001-com-ubuntu-server-focal"
         sku = "20_04-lts"
         version = "latest"
+    }
+
+    identity {
+        type = "SystemAssigned"
     }
 }
