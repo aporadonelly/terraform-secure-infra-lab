@@ -1,26 +1,23 @@
-resource "azurerm_resource_group" "main" {
-  name     = var.resource_group_name
-  location = var.location
-}
+# In modules/security/main.tf
 
-resource "azurerm_key_vault" "main" {
-  name                     = var.key_vault_name
-  location                 = azurerm_resource_group.main.location
-  resource_group_name      = azurerm_resource_group.main.name
-  tenant_id                = data.azurerm_client_config.current.tenant_id
-  sku_name                 = "standard"
-  soft_delete_retention_days = 7
-}
-
+# This block creates a secret inside the Key Vault.
+# It uses the variable passed from the root module.
 resource "azurerm_key_vault_secret" "database_password" {
   name         = "db-password"
   value        = var.database_password_secret_value
-  key_vault_id = azurerm_key_vault.main.id
+  key_vault_id = var.key_vault_id
 }
 
+# This data block retrieves the client configuration, which is needed for the tenant_id and object_id.
+# This is correct and should remain.
+data "azurerm_client_config" "current" {}
+
+
+# This block creates an access policy for the Key Vault, granting access to a VM.
+# It also uses the variable passed from the root module.
 resource "azurerm_key_vault_access_policy" "vm_access" {
-  key_vault_id = azurerm_key_vault.main.id
-  tenant_id    = data.azurerm_client_config.current.tenant_id
+  key_vault_id = var.key_vault_id
+  tenant_id    = var.tenant_id
   object_id    = var.private_vm_object_id
 
   secret_permissions = [
