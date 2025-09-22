@@ -1,19 +1,22 @@
-variable "public_subnet_id" {
-  description = "The ID of the public subnet"
-  type        = string
-}
+# In modules/compute/variables.tf
 
-variable "private_subnet_id" {
-  description = "The ID of the private subnet"
+variable "resource_group" {
+  description = "The name of the resource group."
   type        = string
 }
 
 variable "location" {
-  description = "Deployment region"
+  description = "The location of the resources."
   type        = string
 }
 
-variable "resource_group" {
-  description = "Resource group name (Azure only)"
+variable "private_subnet_id" {
+  description = "The ID of the private subnet."
   type        = string
 }
+
+variable "public_subnet_id" {
+  description = "The ID of the public subnet."
+  type        = string
+}
+
