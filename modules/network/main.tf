@@ -33,14 +33,14 @@ resource "azurerm_network_security_group" "nsg_public" {
   resource_group_name = var.resource_group_name
 
   #SSH always allowed
-  security_rule = {
+  security_rule {
     name                       = "Allow-SSH-from-Admin"
     priority                   = 100
     direction                  = "Inbound"
     access                     = "Allow"
     protocol                   = "Tcp"
     source_port_range          = "*"
-    destination_port_range     = ["22"]
+    destination_port_range     = "22"
     source_address_prefixes    = [var.allowed_admin_cidr]
     destination_address_prefix = "*"
   }
@@ -55,7 +55,7 @@ resource "azurerm_network_security_group" "nsg_public" {
       access                     = "Allow"
       protocol                   = "Tcp"
       source_port_range          = "*"
-      destination_port_ranges    = ["3389"]
+      destination_port_ranges    = "3389"
       source_address_prefixes    = [var.allowed_admin_cidr]
       destination_address_prefix = "*"
     }
