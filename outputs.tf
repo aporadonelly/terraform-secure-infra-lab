@@ -18,3 +18,8 @@ output "public_subnet_id" {
 output "private_subnet_id" {
   value = module.network.private_subnet_id
 }
+
+# for compute #
+output "bastion_vm_ip" {
+  value = module.compute.bastion_vm_public_ip
+}
