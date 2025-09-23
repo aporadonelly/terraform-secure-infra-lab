@@ -24,3 +24,98 @@ resource "azurerm_subnet" "private" {
   virtual_network_name = azurerm_virtual_network.vnet.name
   address_prefixes     = ["10.0.2.0/24"]
 }
+
+
+# NSG - Public Subnet
+resource "azurerm_network_security_group" "nsg_public" {
+  name                = "nsg_public_subnet"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  #SSH always allowed
+  security_rule {
+    name                       = "Allow-SSH-from-Admin"
+    priority                   = 100
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefixes    = [var.allowed_admin_cidr]
+    destination_address_prefix = "*"
+  }
+
+  # Optional RDP
+  dynamic "security_rule" {
+    for_each = var.enable_rdp_rule ? [1] : []
+    content {
+      name                       = "Allow-RDP-from-Admin"
+      priority                   = 110
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_ranges    = "3389"
+      source_address_prefixes    = [var.allowed_admin_cidr]
+      destination_address_prefix = "*"
+    }
+  }
+
+  #Deny all else
+  security_rule {
+    name                       = "Deny-All-Inbound"
+    priority                   = 4096
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+# NSG - Private Subnet
+resource "azurerm_network_security_group" "nsg_private" {
+  name                = "nsg-private-subnet"
+  location            = var.location
+  resource_group_name = var.resource_group_name
+
+  # Allow SSH from inside the VNet (e.g., jumpbox → app)
+  security_rule {
+    name                       = "Allow-SSH-from-VNet"
+    priority                   = 200
+    direction                  = "Inbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_ranges    = ["22"]
+    source_address_prefix      = "VirtualNetwork"
+    destination_address_prefix = "*"
+  }
+
+  # Deny all else
+  security_rule {
+    name                       = "Deny-All-Inbound"
+    priority                   = 4096
+    direction                  = "Inbound"
+    access                     = "Deny"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+}
+
+# Associates a Network Security Group with a Subnet within a Virtual Network.
+
+resource "azurerm_subnet_network_security_group_association" "public_assoc" {
+  subnet_id                 = azurerm_subnet.public.id
+  network_security_group_id = azurerm_network_security_group.nsg_public.id
+}
+
+resource "azurerm_subnet_network_security_group_association" "private_assoc" {
+  subnet_id                 = azurerm_subnet.private.id
+  network_security_group_id = azurerm_network_security_group.nsg_private.id
+}
