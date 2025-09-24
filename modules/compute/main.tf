@@ -4,12 +4,13 @@ resource "tls_private_key" "bastion_ssh" {
     rsa_bits = 4096
 }
 
+#Public IP address for Bastion host
 resource "azurerm_public_ip" "bastion_ip" {
-    name = "bastion-public-ip"
+    name = "${var.vm_prefix}-bastion-pip"
     resource_group_name = var.resource_group_name
     location = var.location
     allocation_method = "Static"
-    sku = "Standard"
+    sku = "Basic"
 }
 
 resource "azurerm_network_interface" "bastion_nic" {
