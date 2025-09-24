@@ -179,3 +179,61 @@ resource "azurerm_linux_virtual_machine" "private_vm" {
     )
 }
 
+#VM monitoring extension for Bastion
+resource "azurerm_virtual_machine_extension" "bastion_monitor" {
+  count                = var.enable_monitoring ? 1 : 0
+  name                 = "AzureMonitorLinuxAgent"
+  virtual_machine_id   = azurerm_linux_virtual_machine.bastion.id
+  publisher            = "Microsoft.Azure.Monitor"
+  type                 = "AzureMonitorLinuxAgent"
+  type_handler_version = "1.0"
+  auto_upgrade_minor_version = true
+
+  tags = var.tags
+}
+
+#VM monitoring extension for private
+resource "azurerm_virtual_machine_extension" "private_monitor" {
+  count                = var.enable_monitoring ? 1 : 0
+  name                 = "AzureMonitorLinuxAgent"
+  virtual_machine_id   = azurerm_linux_virtual_machine.private_vm.id
+  publisher            = "Microsoft.Azure.Monitor"
+  type                 = "AzureMonitorLinuxAgent"
+  type_handler_version = "1.0"
+  auto_upgrade_minor_version = true
+
+  tags = var.tags
+}
+
+#Auto-Shutdown Schedule (Cost Optimization)
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "bastion_shutdown" {
+  count              = var.enable_auto_shutdown ? 1 : 0
+  virtual_machine_id = azurerm_linux_virtual_machine.bastion.id
+  location           = var.location
+  enabled            = true
+
+  daily_recurrence_time = var.auto_shutdown_time
+  timezone              = var.auto_shutdown_timezone
+
+  notification_settings {
+    enabled = false
+  }
+
+  tags = var.tags
+}
+
+resource "azurerm_dev_test_global_vm_shutdown_schedule" "private_shutdown" {
+  count              = var.enable_auto_shutdown ? 1 : 0
+  virtual_machine_id = azurerm_linux_virtual_machine.private_vm.id
+  location           = var.location
+  enabled            = true
+
+  daily_recurrence_time = var.auto_shutdown_time
+  timezone              = var.auto_shutdown_timezone
+
+  notification_settings {
+    enabled = false
+  }
+
+  tags = var.tags
+}
