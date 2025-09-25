@@ -35,3 +35,16 @@ output "bastion_public_ip" {
 output "private_vm_private_ip" {
   value = module.compute.private_vm_private_ip
 }
+
+# for network
+output "vnet_id" {
+  value = module.network.vnet_id
+}
+
+output "nsg_public_id" {
+  value = module.network.nsg_public_id
+}
+
+output "nsg_private_id" {
+  value = module.network.nsg_private_id
+}
