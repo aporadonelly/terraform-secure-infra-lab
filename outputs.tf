@@ -21,5 +21,17 @@ output "private_subnet_id" {
 
 # for compute #
 output "bastion_vm_ip" {
-  value = module.compute.bastion_vm_public_ip
+  value = module.compute.bastion_public_ip
+}
+output "ssh_private_key" {
+  value     = module.compute.ssh_private_key
+  sensitive = true
+}
+
+output "bastion_public_ip" {
+  value = module.compute.bastion_public_ip
+}
+
+output "private_vm_private_ip" {
+  value = module.compute.private_vm_private_ip
 }

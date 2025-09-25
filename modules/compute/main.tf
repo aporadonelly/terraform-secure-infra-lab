@@ -1,5 +1,5 @@
 #Generate SSH
-resource "tls_private_key" "bastion_ssh" {
+resource "tls_private_key" "ssh_key" {
     algorithm = "RSA"
     rsa_bits = 4096
 }
@@ -10,7 +10,7 @@ resource "azurerm_public_ip" "bastion_ip" {
     resource_group_name = var.resource_group_name
     location = var.location
     allocation_method = "Static"
-    sku = "Basic"
+    sku = "Standard" #Standard for Standard SKU and Basic for Basic SKU (free but ip limited)
 
     tags = merge(
       var.tags,
@@ -60,7 +60,7 @@ resource "azurerm_linux_virtual_machine" "bastion" {
 
     admin_ssh_key {
         username = var.admin_username
-        public_key = tls_private_key.bastion_ssh.public_key_openssh
+        public_key = tls_private_key.ssh_key.public_key_openssh
     }
 
     os_disk {
@@ -138,7 +138,7 @@ resource "azurerm_linux_virtual_machine" "private_vm" {
 
     admin_ssh_key {
         username = var.admin_username
-        public_key = tls_private_key.bastion_ssh.public_key_openssh
+        public_key = tls_private_key.ssh_key.public_key_openssh
     }
 
     os_disk {

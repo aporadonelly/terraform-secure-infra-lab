@@ -1,10 +1,27 @@
 # ┌────────────────────────────────────────────┐
 # │ Root Terraform Configuration - main.tf     │
 # └────────────────────────────────────────────┘
+# Data source for current Azure client
+data "azurerm_client_config" "current" {}
+
+# Random suffix for unique naming
+resource "random_string" "suffix" {
+  length  = 6
+  special = false
+  upper   = false
+}
 
 resource "azurerm_resource_group" "rg" {
   name     = var.resource_group_name
   location = var.resource_group_location
+
+  tags = merge(
+    var.tags,
+    {
+      Environment = var.environment
+      CreatedDate = timestamp()
+    }
+  )
 }
 
 module "network" {
@@ -13,12 +30,42 @@ module "network" {
   location            = var.resource_group_location
 }
 
-# for compute #
+# Key Vault Module
+# module "keyvault" {
+#  source = "./modules/keyvault"
 
+# resource_group_name = azurerm_resource_group.rg.name
+# location            = azurerm_resource_group.rg.location
+#  environment         = var.environment
+# random_suffix       = random_string.suffix.result
+# tenant_id           = data.azurerm_client_config.current.tenant_id
+#  object_id           = data.azurerm_client_config.current.object_id
+# tags                = var.tags
+# }
+
+# for compute #
 module "compute" {
   source              = "./modules/compute"
   resource_group_name = azurerm_resource_group.rg.name
   location            = var.resource_group_location
   public_subnet_id    = module.network.public_subnet_id
   private_subnet_id   = module.network.private_subnet_id
+
+  key_vault_name = "kv-dev-temp123" # to change not hardcoded
+  admin_username = var.admin_username
+  vm_size        = "Standard_B1s"
+
+  # Optional parameters with defaults
+  enable_monitoring      = true
+  enable_auto_shutdown   = true
+  auto_shutdown_time     = "1900"
+  auto_shutdown_timezone = "UTC"
+
+  tags = var.tags
+
+  # Important: Ensure Key Vault is created before VMs
+  # depends_on = [
+  # module.keyvault
+  #module.security
+  # ]
 }
