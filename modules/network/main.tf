@@ -72,6 +72,67 @@ resource "azurerm_network_security_group" "nsg_public" {
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }
+
+  # Outbound rules for public subnet
+  security_rule {
+    name                       = "Allow-HTTPS-Outbound"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-HTTP-Outbound"
+    priority                   = 110
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-DNS-Outbound"
+    priority                   = 120
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "53"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-SSH-to-Private-Subnet"
+    priority                   = 130
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "22"
+    source_address_prefix      = "*"
+    destination_address_prefix = var.private_subnet_cidr
+  }
+
+  security_rule {
+    name                       = "Allow-NTP-Outbound"
+    priority                   = 140
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Udp"
+    source_port_range          = "*"
+    destination_port_range     = "123"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
 }
 
 # NSG - Private Subnet
@@ -102,6 +163,55 @@ resource "azurerm_network_security_group" "nsg_private" {
     protocol                   = "*"
     source_port_range          = "*"
     destination_port_range     = "*"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  # Outbound rules for private subnet
+  security_rule {
+    name                       = "Allow-HTTPS-Outbound"
+    priority                   = 100
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "443"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-HTTP-Outbound"
+    priority                   = 110
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Tcp"
+    source_port_range          = "*"
+    destination_port_range     = "80"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-DNS-Outbound"
+    priority                   = 120
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "*"
+    source_port_range          = "*"
+    destination_port_range     = "53"
+    source_address_prefix      = "*"
+    destination_address_prefix = "*"
+  }
+
+  security_rule {
+    name                       = "Allow-NTP-Outbound"
+    priority                   = 130
+    direction                  = "Outbound"
+    access                     = "Allow"
+    protocol                   = "Udp"
+    source_port_range          = "*"
+    destination_port_range     = "123"
     source_address_prefix      = "*"
     destination_address_prefix = "*"
   }

@@ -2,11 +2,11 @@
 set -e
 
 # Wait for cloud-init to complete
-cloud-init status --wait
+#cloud-init status --wait reason of removing -> create deadlocks when server starting
 
 # Update system
 apt-get update
-apt-get upgrade -y
+#apt-get upgrade -y
 
 # Install essential security packages
 apt-get install -y \
