@@ -38,19 +38,6 @@ module "network" {
   allowed_admin_cidr = var.allowed_admin_cidr
 }
 
-# Key Vault Module
-# module "keyvault" {
-#  source = "./modules/keyvault"
-
-# resource_group_name = azurerm_resource_group.rg.name
-# location            = azurerm_resource_group.rg.location
-#  environment         = var.environment
-# random_suffix       = random_string.suffix.result
-# tenant_id           = data.azurerm_client_config.current.tenant_id
-#  object_id           = data.azurerm_client_config.current.object_id
-# tags                = var.tags
-# }
-
 # for compute #
 module "compute" {
   source              = "./modules/compute"
@@ -76,4 +63,34 @@ module "compute" {
   # module.keyvault
   #module.security
   # ]
+}
+
+# Module to manage Key Vault resources
+module "keyvault" {
+  source = "./modules/keyvault"
+
+  kv_name        = "my-secure-infra-keyvault"
+  location       = var.resource_group_location
+  resource_group = azurerm_resource_group.rg.name
+  tenant_id      = data.azurerm_client_config.current.tenant_id
+  object_id      = data.azurerm_client_config.current.object_id
+}
+
+resource "random_password" "db_password" {
+  length  = 32
+  special = true
+}
+
+module "security" {
+  source = "./modules/security" # Corrected path
+
+  # Required arguments for the security module
+  key_vault_name                 = module.keyvault.kv_name
+  key_vault_id                   = module.keyvault.id
+  database_password_secret_value = random_password.db_password.result
+  private_vm_object_id           = module.compute.private_vm_principal_id
+  resource_group_name            = azurerm_resource_group.rg.name
+  location                       = var.resource_group_location
+  tenant_id                      = data.azurerm_client_config.current.tenant_id
+  object_id                      = data.azurerm_client_config.current.object_id
 }
