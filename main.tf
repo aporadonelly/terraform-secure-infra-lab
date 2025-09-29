@@ -88,7 +88,7 @@ module "security" {
   key_vault_name                 = module.keyvault.kv_name
   key_vault_id                   = module.keyvault.id
   database_password_secret_value = random_password.db_password.result
-  private_vm_object_id           = module.compute.bastion_private_id
+  private_vm_object_id           = module.compute.private_vm_principal_id
   resource_group_name            = azurerm_resource_group.rg.name
   location                       = var.resource_group_location
   tenant_id                      = data.azurerm_client_config.current.tenant_id
