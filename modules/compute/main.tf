@@ -81,10 +81,78 @@ resource "azurerm_linux_virtual_machine" "bastion" {
     }
 
     #Security hardening script
-    custom_data = base64encode(templatefile("${path.module}/scripts/vm_hardening.sh", {
-      admin_username = var.admin_username
-      key_vault_name = var.key_vault_name
-    }))
+    custom_data = base64encode(<<-EOF
+  #cloud-config
+  package_update: true
+  package_upgrade: false
+  packages:
+    - ufw
+    - fail2ban
+    - unattended-upgrades
+    - jq
+    - ca-certificates
+    - curl
+    - apt-transport-https
+    - lsb-release
+    - gnupg
+
+  runcmd:
+    # Add Azure CLI repository
+    - curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+    - echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/azure-cli.list
+    - apt-get update
+    - apt-get install -y azure-cli
+
+    # Configure firewall
+    - ufw --force enable
+    - ufw default deny incoming
+    - ufw default allow outgoing
+    - ufw allow 22/tcp
+    - ufw reload
+
+    # Configure fail2ban
+    - |
+      cat > /etc/fail2ban/jail.local <<'FAIL2BAN'
+      [sshd]
+      enabled = true
+      port = 22
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = 3
+      bantime = 3600
+      findtime = 600
+      FAIL2BAN
+    - systemctl enable fail2ban
+    - systemctl restart fail2ban
+
+    # Harden SSH
+    - sed -i 's/^#*PermitRootLogin.*/PermitRootLogin no/' /etc/ssh/sshd_config
+    - sed -i 's/^#*PasswordAuthentication.*/PasswordAuthentication no/' /etc/ssh/sshd_config
+    - systemctl restart sshd
+
+    # Create Key Vault access script
+    - |
+      cat > /usr/local/bin/get-secret.sh <<'SCRIPT'
+      #!/bin/bash
+      SECRET_NAME=$$1
+      KV_NAME=${var.key_vault_name}
+      az login --identity --allow-no-subscriptions 2>/dev/null
+      az keyvault secret show --vault-name $$KV_NAME --name $$SECRET_NAME --query value -o tsv
+      SCRIPT
+    - chmod +x /usr/local/bin/get-secret.sh
+
+    # Set MOTD
+    - |
+      cat > /etc/motd <<'MOTD'
+      #############################################################
+      #                   AUTHORIZED ACCESS ONLY                 #
+      #  All actions are logged and monitored.                   #
+      #############################################################
+      Environment: ${var.admin_username}
+      Managed by: Terraform
+      MOTD
+  EOF
+  )
 
     boot_diagnostics {
       storage_account_uri = null  # Use managed storage account
