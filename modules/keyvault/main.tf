@@ -7,6 +7,10 @@ resource "azurerm_key_vault" "this" {
   tenant_id           = var.tenant_id
   sku_name            = "standard"
 
+  # For testing - disable purge protection
+  purge_protection_enabled = false
+  soft_delete_retention_days = 7
+
   # This block is essential for setting permissions.
   access_policy {
     tenant_id = var.tenant_id

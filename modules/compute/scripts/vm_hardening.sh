@@ -2,11 +2,30 @@
 set -e
 
 # Wait for cloud-init to complete
-#cloud-init status --wait reason of removing -> create deadlocks when server starting
+
+# Wait for apt locks to be released
+echo "Waiting for apt locks to be released..."
+while sudo fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
+      sudo fuser /var/lib/dpkg/lock >/dev/null 2>&1 || \
+      sudo fuser /var/lib/apt/lists/lock >/dev/null 2>&1 || \
+      sudo fuser /var/cache/apt/archives/lock >/dev/null 2>&1; do
+    echo "Waiting for other apt processes to finish..."
+    sleep 5
+done
 
 # Update system
 apt-get update
-#apt-get upgrade -y
+
+# Install prerequisites
+apt-get install -y ca-certificates curl apt-transport-https lsb-release gnupg
+
+# Add Microsoft's GPG key and Azure CLI repository
+curl -sL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor | tee /etc/apt/trusted.gpg.d/microsoft.gpg > /dev/null
+AZ_REPO=$(lsb_release -cs)
+echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $AZ_REPO main" | tee /etc/apt/sources.list.d/azure-cli.list
+
+# Update again with new repo
+apt-get update
 
 # Install essential security packages
 apt-get install -y \
